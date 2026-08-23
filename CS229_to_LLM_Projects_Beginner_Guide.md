@@ -20,9 +20,9 @@ Read this **first**, then open the spec for the precise details when you're read
 
 ---
 
-## The big picture: how the six projects connect
+## The big picture: how the seven projects connect
 
-Don't think of these as six separate assignments. Think of them as one skill tree where each project hands tools to the next. Here's the journey.
+Don't think of these as seven separate assignments. Think of them as one skill tree where each project hands tools to the next. Here's the journey.
 
 ### Phase 0 — Foundations (before you touch a single project)
 
@@ -54,9 +54,13 @@ A change of pace — you train a tiny model from scratch and reproduce two famou
 
 ### Phase 6 — Project 6 (RLHF): learn to *steer* a model
 
-The capstone. You implement the algorithm behind modern alignment and use it to change how a model writes. **Connect:** it combines generation, fine-tuning, and probability math from every earlier phase into the technique that defines today's frontier models.
+The alignment capstone. You implement the algorithm behind modern alignment and use it to change how a model writes. **Connect:** it combines generation, fine-tuning, and probability math from every earlier phase into the technique that defines today's frontier models — and its RLVR extension (rewarding *correct reasoning*) is the bridge to the newest research.
 
-**The through-line:** *measure → see → judge → compare → understand → steer.* Finish all six and you can honestly say you can take a language model apart and put it back together. Do even three (say P1, P3, P6 — one per skill) and you have a coherent story to tell.
+### Phase 7 — Project 7 (Attention Internals): learn to *reverse-engineer* a model
+
+The deepest cut. You rebuild attention from your notes' own equations, prove it correct against a real model, then find and causally verify an **induction head** — the little circuit behind in-context learning. **Connect:** where Phase 1 read *where* a concept lives and Phase 2 saw its *shape*, this asks *which component computes it* — landing you in the vocabulary of mechanistic interpretability, arguably the most direct on-ramp to LLM-research work.
+
+**The through-line:** *measure → see → judge → compare → understand → steer → reverse-engineer.* Finish all seven and you can honestly say you can take a language model apart and put it back together. Do even three (say P1, P3, P6 — one per skill) and you have a coherent story to tell; add P7 and you have a mechanistic-interpretability portfolio piece.
 
 ---
 
@@ -129,7 +133,7 @@ Python, PyTorch + `transformers` (embeddings), `sentence-transformers` (for the 
 ### What you'll learn
 *In ML terms:* PCA/SVD, ICA and non-Gaussianity, k-means vs. Gaussian-mixture EM, whitening, and the anisotropy / representation-degeneration phenomenon in embeddings.
 
-*In plain language:* how to take an incomprehensibly high-dimensional space and both *shrink it so you can see it* and *find the meaningful directions hidden inside it* — plus the humbling lesson that the "obvious" tool (PCA) isn't always the one that finds meaning.
+*In plain language:* how to take an incomprehensibly high-dimensional space and both *shrink it so you can see it* and *find the meaningful directions hidden inside it* — plus the humbling lesson that the "obvious" tool (PCA) isn't always the one that finds meaning. (Optional finale: these same embeddings are exactly what powers semantic *search* and *RAG* — retrieval-augmented generation — so you can end by building a tiny "find the most relevant sentence" engine and see your geometry cleanup actually improve the results. CS229 Ch. 16.)
 
 ---
 
@@ -142,7 +146,7 @@ When a model says it's 90% sure, is it actually right 90% of the time? A trustwo
 *Must-know:*
 
 - **Probability distributions and expectation** — what a probability actually claims.
-- **Softmax and cross-entropy** — how a model turns scores into probabilities and how it's trained. CS229 Ch. 2, Ch. 14 (Eq. 14.8).
+- **Softmax and cross-entropy** — how a model turns scores into probabilities and how it's trained. CS229 Ch. 2, §17.2 (the next-token prediction loss).
 - **Maximum likelihood again** — fitting by making observed outcomes probable.
 
 *Nice-to-have:*
@@ -243,20 +247,20 @@ Python, NumPy (the from-scratch linear/bias-variance experiments), PyTorch (the 
 # Project 6 — RLHF from Scratch: *steering how a model behaves*
 
 ### In plain language
-This is how real labs turn a raw text-predictor into a helpful assistant: you let the model generate, you *score* what it produced (good/bad), and you nudge it to do more of the good. The scoring-and-nudging algorithm is called policy gradient, and it comes straight from the reinforcement-learning chapters of your notes. You'll build a miniature version — steering a small model to, say, write more positively — and along the way you'll hit the two truths every alignment team knows: the naive method is *maddeningly noisy* (and there's a classic trick to calm it), and if you only chase the reward, the model finds dumb ways to cheat (so you add a leash that keeps it close to its original self). It's the most "real" project of the six — a tiny but faithful version of what powers today's chatbots.
+This is how real labs turn a raw text-predictor into a helpful assistant: you let the model generate, you *score* what it produced (good/bad), and you nudge it to do more of the good. The scoring-and-nudging algorithm is called policy gradient, and it comes straight from the reinforcement-learning chapters of your notes. You'll build a miniature version — steering a small model to, say, write more positively — and along the way you'll hit the two truths every alignment team knows: the naive method is *maddeningly noisy* (and there's a classic trick to calm it), and if you only chase the reward, the model finds dumb ways to cheat (so you add a leash that keeps it close to its original self). It's the most "real" project of the seven — a tiny but faithful version of what powers today's chatbots.
 
 ### Math to learn first
 *Must-know:*
 
-- **Probability and expectation, and the "log-derivative trick"** — the one identity the whole method rests on. CS229 Ch. 17.
+- **Probability and expectation, and the "log-derivative trick"** — the one identity the whole method rests on. CS229 Ch. 21.
 - **Gradients and gradient ascent** — you're climbing toward higher reward.
-- **What a reward, a policy, and an MDP are** — the reinforcement-learning frame. CS229 Ch. 15.1.
+- **What a reward, a policy, and an MDP are** — the reinforcement-learning frame. CS229 §19.1.
 
 *Nice-to-have:*
 
-- **Variance of an estimator, and why a "baseline" reduces it** — the trick that makes training bearable. CS229 Ch. 17.
+- **Variance of an estimator, and why a "baseline" reduces it** — the trick that makes training bearable. CS229 Ch. 21.
 - **KL divergence** — the "leash" that stops the model drifting into gibberish. (Connects to regularization, Ch. 9.)
-- **How autoregressive generation works** — the model's sampling *is* the policy. CS229 Ch. 14 (Eqs. 14.9–14.16).
+- **How autoregressive generation works** — the model's sampling *is* the policy. CS229 §17.2.
 
 ### Tools
 Python, PyTorch + `transformers` (the model you'll steer), `peft` (LoRA — lets you fine-tune cheaply within 8 GB), a small off-the-shelf reward scorer (or a simple rule you write), your `llmkit` for token probabilities, matplotlib.
@@ -268,11 +272,49 @@ Python, PyTorch + `transformers` (the model you'll steer), `peft` (LoRA — lets
 4. **Use a real reward:** swap in a sentiment scorer and steer the model to write more positively. *(Checkpoint: before/after samples read differently.)*
 5. **Level up — add the leash:** add a KL penalty toward the original model. Show that *without* it the model reward-hacks into nonsense, and *with* it, quality holds. *(Checkpoint: you can plot the reward-vs-drift tradeoff.)*
 6. **Complete:** "RLHF in a few hundred lines," with reward curves, the noise-reduction result, the leash tradeoff, and sample outputs. **Done when you can explain every term in your loss to someone else.**
+7. **Go even further — reward *correctness* instead of taste (the 2025 frontier):** instead of scoring "how positive," give the model little problems with a *checkable* answer (simple arithmetic, or "output must match this format"), let it "think out loud" first, and reward it *only* when a checker confirms the answer is right. This is called **RLVR** (reinforcement learning with verifiable rewards) and it needs no reward model at all — the checker is free and can't be gamed. It's the exact idea behind today's "reasoning" models, and it fits on your laptop. *(Checkpoint: accuracy climbs and the model's step-by-step reasoning gets cleaner. CS229 Ch. 18.)*
 
 ### What you'll learn
 *In ML terms:* the policy-gradient theorem and REINFORCE, score-function estimators and baselines for variance reduction, KL-regularized fine-tuning, LoRA, and the RLHF training loop that underlies modern alignment.
 
 *In plain language:* how to change a model's behavior by rewarding what you like — the actual method behind ChatGPT-style assistants — plus first-hand experience of the two things that make it hard: the training is jittery, and models will "cheat" any reward you don't guard carefully.
+
+---
+
+# Project 7 — Inside the Attention Head: *how a Transformer actually computes*
+
+### In plain language
+Every other project treats the model's insides as a place to *read from*. This one opens the engine and studies the single most important part — **attention**, the mechanism that lets a model look back at earlier words and decide which ones matter right now. You'll build attention yourself from the equations in your (newly updated) notes, then prove your version is correct by checking it matches a real model's attention number-for-number. Then the fun part: you go looking for a specific, famous little circuit called an **induction head** — a piece of the model that has learned the trick "*I saw this before; here's what came next, so I'll copy it.*" That trick is a big part of how models learn from examples you put in the prompt. Finally, you'll *prove* a head matters by switching it off and watching the model get worse — the difference between "this looks important" and "this **is** important." This is the entry point to **mechanistic interpretability**, the research area trying to reverse-engineer what's actually happening inside these models.
+
+### Math to learn first
+*Must-know:*
+
+- **Dot products, matrix multiplication, and the softmax** — attention is "compare with dot products, turn into weights with softmax, take a weighted average." CS229 §17.3 (and the softmax from Ch. 2).
+- **Why divide by √(dimension)** — a small scaling that keeps the numbers from blowing up; the notes explain exactly why. CS229 §17.3.
+- **What "attend to" means** — each position produces a query, every position offers a key, and the match decides where attention goes.
+
+*Nice-to-have:*
+
+- **Low-rank matrices and subspaces** — a head only "sees" a small slice of the space; PCA intuition from Project 2 helps. CS229 Ch. 12.
+- **The idea of an ablation / knockout experiment** — the causal logic of "remove it and see what breaks."
+- **Chain-of-thought and verifiable rewards** — for the reasoning extension. CS229 Ch. 18.
+
+### Tools
+Python, PyTorch + `transformers` (to pull a real model's attention weights and compare), NumPy (you write attention yourself), matplotlib (attention heatmaps), your `llmkit` hooks (extended to capture attention). No training needed — this is dissection, not construction, so it's light on the GPU.
+
+### The build roadmap
+1. **Learn:** understand attention as query-key-value — be able to say, in one breath, "dot the query with every key, softmax into weights, average the values." *(Checkpoint: you can draw it.)*
+2. **Build & prove it:** implement one attention head from the notes' equations, then check it matches GPT-2's real head to tiny numerical tolerance. *(Checkpoint: your numbers equal the library's numbers.)*
+3. **Add the variants:** extend to multi-head, then the memory-saving MQA/GQA variants; compare their cost. *(Checkpoint: a small table of "memory vs. quality.")*
+4. **Look inside:** visualize attention patterns from a real model and name a few head "types" (one that looks at the previous word, one that parks on the first token…). *(Checkpoint: an annotated gallery.)*
+5. **Hunt the induction head:** feed repeated patterns and find the head that copies — the in-context-learning circuit. *(Checkpoint: you can point to the head and show it copying.)*
+6. **Prove it matters:** switch heads off one at a time and measure the damage; rank heads by importance. *(Checkpoint: knocking out the induction head visibly hurts copying.)*
+7. **Go further (the 2025 angle):** does prompting the model to "think step by step" change *which* heads it needs? Compare the importance map with and without a chain of thought. *(Checkpoint: a before/after head map. CS229 Ch. 18.)*
+
+### What you'll learn
+*In ML terms:* scaled dot-product and multi-head self-attention (and MQA/GQA variants), QK vs. OV circuits, attention-pattern analysis, induction heads and their link to in-context learning, and causal methods (head ablation / activation patching) — the working vocabulary of mechanistic interpretability.
+
+*In plain language:* how the core of a Transformer actually computes, built with your own hands and *proven* correct — and how researchers move from "this part looks important" to "this part **is** important" by carefully breaking things. It's the most direct answer to "but how does it really work inside?"
 
 ---
 
@@ -289,6 +331,7 @@ Here's the whole curriculum's payoff, said both ways: the left column is what yo
 | Compared generative vs. discriminative classifiers (GDA, Naive Bayes, logistic, kernel SVM via SMO) and the data-efficiency crossover | I know the two fundamental ways to teach a machine to sort things, when each wins, and I can code all of them |
 | Reproduced double descent and grokking; decomposed error into bias and variance; studied regularization | I understand, hands-on, the strange truth about how modern models generalize — and why "bigger overfits" is wrong |
 | Built a KL-regularized REINFORCE (policy-gradient) fine-tuning loop with variance-reduction baselines and LoRA | I can steer a model's behavior with rewards — the real technique behind assistants — and I've felt why it's noisy and why models cheat |
+| Reverse-engineered self-attention from scratch, verified it numerically against a real model, and causally localized induction heads by ablation | I can rebuild the core of a Transformer with my own hands, *prove* it's correct, and show which internal parts actually do the work |
 | Engineered a reusable interpretability toolkit; ran controlled experiments with baselines and reproducible figures | I can set up a clean experiment, rule out the boring explanation, and produce a result someone else can trust and repeat |
 
 **And the meta-skill, in one sentence:** you'll have practiced the actual loop of research — *turn math into code, point it at a real model, measure honestly, and explain the gap between theory and reality* — which is exactly the muscle LLM research runs on.

@@ -1,6 +1,8 @@
-# From CS229 to LLM Research — Six Portfolio Projects
+# From CS229 to LLM Research — Seven Portfolio Projects
 
-*A project curriculum that turns the classical machine-learning math in your CS229 notes (Ng & Ma, 2023) into hands-on investigations of how large language models actually work.*
+*A project curriculum that turns the classical machine-learning math in your CS229 notes (Ng & Ma) into hands-on investigations of how large language models actually work.*
+
+> **Updated for the new edition of the notes.** The revised `main_notes` is a substantial re-organization: the single old "foundation models" chapter is now split into four — **representation learning & LoRA (Ch. 15)**, **contrastive learning, retrieval & RAG (Ch. 16)**, **Transformers, attention, MoE & SFT (Ch. 17)**, and **reasoning: chain-of-thought & RLVR (Ch. 18)** — and the RL material moved to **MDPs (Ch. 19)**, control (Ch. 20), and **policy gradient & PPO (Ch. 21)**. Every citation below points at the new numbering, the existing projects have been enriched with the new material, and a **seventh project** (attention internals / mechanistic interpretability) was added to exploit the now-explicit Transformer chapter. Classical chapters 1–13 kept their numbers, so Projects 1–5's core anchors are unchanged.
 
 ---
 
@@ -66,7 +68,7 @@ Your **"little bit of API access"** is reserved for *optional* comparison points
 
 ## Build this once: the shared toolkit (a mini "Project 0")
 
-Before Project 1, spend an evening building a small reusable package — `llmkit/` — that every later project imports. This is itself portfolio-worthy engineering and it stops you from rewriting the same plumbing six times.
+Before Project 1, spend an evening building a small reusable package — `llmkit/` — that every later project imports. This is itself portfolio-worthy engineering and it stops you from rewriting the same plumbing seven times.
 
 ```
 llmkit/
@@ -80,8 +82,8 @@ llmkit/
 
 Two functions do most of the work and are worth getting right:
 
-- **`get_activations(model, prompts, layers)`** — uses PyTorch **forward hooks** on the residual stream / MLP outputs to capture hidden states `φ_ℓ(x) ∈ ℝ^d` at chosen layers. This *is* the representation `φ_θ(x)` from your notes' foundation-models chapter (§14.1) — the object the "linear probe" (Eq. 14.1) and "fine-tuning" (Eq. 14.2) are defined on.
-- **`token_logprobs(model, text)`** — returns per-position `log p_θ(x_t | x_{<t})`, i.e. the summands of the autoregressive cross-entropy loss in your notes (Eq. 14.8). Half the projects are secretly about these numbers.
+- **`get_activations(model, prompts, layers)`** — uses PyTorch **forward hooks** on the residual stream / MLP outputs to capture hidden states `φ_ℓ(x) ∈ ℝ^d` at chosen layers. This *is* the representation `φ_θ(x)` from your notes' representation-learning chapter (§15.1) — the object the "linear probe" and "fine-tuning" are defined on (§15.1; the parameter-efficient **LoRA** variant is now spelled out separately in §15.2).
+- **`token_logprobs(model, text)`** — returns per-position `log p_θ(x_t | x_{<t})`, i.e. the summands of the autoregressive **next-token prediction loss** in your notes (§17.2). Half the projects are secretly about these numbers.
 
 Everything else (tokenizers, `datasets`, `matplotlib`, training loops' outer scaffolding) is plumbing you may use freely. The *learning algorithms* are what you implement by hand.
 
@@ -91,14 +93,15 @@ Everything else (tokenizers, `datasets`, `matplotlib`, training loops' outer sca
 
 | # | Project | Theme | Core CS229 chapters | Headline LLM question |
 |---|---|---|---|---|
-| 1 | **Linear Probes & the Logit Lens** | Internals | 1, 2, 8, 9 (+14.1) | *Where in an LLM does a concept become linearly readable?* |
+| 1 | **Linear Probes & the Logit Lens** | Internals | 1, 2, 8, 9 (+15.1) | *Where in an LLM does a concept become linearly readable?* |
 | 2 | **The Shape of Meaning** (PCA/ICA/EM on embeddings) | Representation | 10, 11, 12, 13 | *Is embedding space a narrow cone, and do its independent axes mean anything?* |
-| 3 | **Are LLMs Honest About Uncertainty?** (calibration) | Behavior/Eval | 1.3, 2, 3 (+14 temperature) | *Are token probabilities calibrated, and does instruction-tuning break that?* |
+| 3 | **Are LLMs Honest About Uncertainty?** (calibration) | Behavior/Eval | 1.3, 2, 3 (+17.2 temperature) | *Are token probabilities calibrated, and does instruction-tuning break that?* |
 | 4 | **Who Wrote This?** (generative vs. discriminative machine-text detection) | Behavior/Eval | 4, 5, 6 | *Does the GDA-vs-logistic tradeoff from the notes hold on AI-text detection?* |
 | 5 | **Double Descent & Grokking** (from-scratch tiny Transformer) | Training Dynamics | 7, 8, 9 | *Can I reproduce double descent and grokking, and does weight decay control them?* |
-| 6 | **RLHF from Scratch** (REINFORCE on a small LM) | Training Dynamics / Behavior | 15, 17 (+14) | *Can policy gradient steer a language model's decoding, and what does it cost?* |
+| 6 | **RLHF from Scratch** (REINFORCE on a small LM) | Training Dynamics / Behavior | 19, 21 (+17.2, 17.8, 18) | *Can policy gradient steer a language model's decoding, and what does it cost?* |
+| 7 | **Inside the Attention Head** (mechanistic interpretability) | Internals | 17.3, 17.4 (+12, 18) | *Which attention heads causally implement in-context copying — and can I prove it by ablation?* |
 
-Together they touch **Chapters 1–15 and 17**. (Chapter 16, LQR/DDP/LQG, is intentionally omitted — see the appendix for why it's the one piece that doesn't bridge cleanly to LLMs.)
+Together they touch **Chapters 1–13 and 15–21** — essentially the whole book. The updated edition splits the old single "foundation models" chapter into four richer ones, and the projects now reach all of them: representation learning & LoRA (Ch. 15), contrastive learning & retrieval/RAG (Ch. 16), Transformers, attention, MoE & SFT (Ch. 17), and chain-of-thought & RLVR reasoning (Ch. 18), plus the reinforcement-learning chapters — MDPs (Ch. 19) and policy gradient & PPO (Ch. 21). (Chapter 20, LQR/DDP/LQG optimal control, is intentionally omitted — see the appendix for why it's the one piece that doesn't bridge cleanly to LLMs — and the new diffusion chapter, Ch. 14, is left as an optional bonus rather than a core project.)
 
 ---
 
@@ -113,9 +116,9 @@ Together they touch **Chapters 1–15 and 17**. (Chapter 16, LQR/DDP/LQG, is int
 - **Ch. 1 — Linear regression** (§1.2 normal equations, §1.3 the probabilistic interpretation) for continuous probes (e.g. probing for token position or sentence length).
 - **Ch. 9 — Regularization & model selection** (§9.1 L2 regularization, §9.3 cross-validation) — essential, because a probe that's too powerful "reads in" structure that isn't there.
 - **Ch. 8 — Generalization / bias-variance** (§8.1) to reason about *selectivity*: a probe's accuracy confounds "the info is in the representation" with "the probe is strong."
-- **Ch. 14 — Foundation models** (§14.1, Eq. 14.1): the **linear probe** is literally defined there as `w^⊤ φ_θ̂(x)` on a frozen representation. You are implementing the notes' own equation.
+- **Ch. 15 — Representation learning & foundation models** (§15.1): the **linear probe** is literally defined there as `w^⊤ φ_θ̂(x)` on a frozen representation. You are implementing the notes' own construction.
 
-**The bridge.** The notes define adaptation of a foundation model either by **fine-tuning** (Eq. 14.2, update everything) or by a **linear probe** (Eq. 14.1, a linear head on frozen features). Interpretability research uses that exact linear probe not to *solve* a task but to *ask a question*: if a simple linear map from layer ℓ's activations predicts property P with high accuracy, then P is (linearly) represented at layer ℓ. So logistic regression — Chapter 2 — becomes a measuring instrument for the geometry of thought inside a Transformer.
+**The bridge.** The notes define adaptation of a foundation model either by **fine-tuning** (§15.1, update everything — or LoRA's low-rank update, §15.2) or by a **linear probe** (§15.1, a linear head on frozen features). Interpretability research uses that exact linear probe not to *solve* a task but to *ask a question*: if a simple linear map from layer ℓ's activations predicts property P with high accuracy, then P is (linearly) represented at layer ℓ. So logistic regression — Chapter 2 — becomes a measuring instrument for the geometry of thought inside a Transformer. (In the previous edition that Transformer was a black box; the updated notes now spell out its architecture in §17.3, which is exactly what **Project 7** pries open — probing tells you *where* a concept lives, Project 7 asks *which components* put it there.)
 
 **The math you'll own.** Deriving the logistic-regression gradient and the Newton update (§2.4); the softmax cross-entropy gradient for the multi-class case (§2.3); why L2 regularization (§9.1) corresponds to a Gaussian prior / MAP estimate (ties to §9.4); the bias-variance reason a high-capacity probe overstates how much a layer "knows."
 
@@ -156,8 +159,9 @@ Together they touch **Chapters 1–15 and 17**. (Chapter 16, LQR/DDP/LQG, is int
 - **Ch. 12 — PCA** (the whole chapter): covariance, eigenvectors, the maximal-variance derivation.
 - **Ch. 13 — ICA** (§13.1 ambiguities, §13.2 densities under linear transforms, §13.3 the Bell–Sejnowski update rule). ICA finds statistically *independent* components, not just uncorrelated ones.
 - **Ch. 10 — k-means** and **Ch. 11 — EM for mixtures of Gaussians** (§11.1, §11.4; Jensen's inequality §11.2; the ELBO §11.3). Cluster embeddings to induce senses/topics with soft assignments.
+- **Ch. 16 — Contrastive learning & retrieval** (§16.2 the contrastive objective, §16.3 semantic retrieval, §16.4 RAG): the updated edition now spells out *why* the sentence embeddings you're dissecting have the geometry they do — models like `all-MiniLM` are trained with a **contrastive loss** that pulls semantically similar pairs together and pushes random pairs apart. That objective is exactly what creates (and distorts) the cone you're measuring, and §16.3–16.4 show how retrieval and RAG *consume* this geometry downstream.
 
-**The bridge.** Your notes describe word/token **embeddings** `e_i ∈ ℝ^d` and contextual representations `φ_θ(x)` (§14.3, §14.1) as the numeric substrate of language models. Chapters 10–13 are precisely the toolkit for asking *what shape that substrate has*. Two real, somewhat surprising phenomena make this more than a demo: (1) **representation anisotropy** — contextual embeddings occupy a narrow cone, so raw cosine similarity is misleading, and simply removing the top few PCA directions improves semantic tasks ("all-but-the-top"); (2) recent work shows **ICA** recovers embedding axes that are far more human-interpretable than PCA axes and even align across languages/models. You'll reproduce both from scratch.
+**The bridge.** Your notes describe token **embeddings** `e_i ∈ ℝ^d` (introduced with the Transformer in §17.3) and contextual representations `φ_θ(x)` (§15.1) as the numeric substrate of language models. Chapters 10–13 are precisely the toolkit for asking *what shape that substrate has*. Two real, somewhat surprising phenomena make this more than a demo: (1) **representation anisotropy** — contextual embeddings occupy a narrow cone, so raw cosine similarity is misleading, and simply removing the top few PCA directions improves semantic tasks ("all-but-the-top"); (2) recent work shows **ICA** recovers embedding axes that are far more human-interpretable than PCA axes and even align across languages/models. You'll reproduce both from scratch.
 
 **The math you'll own.** PCA as eigendecomposition of the covariance / as SVD, and why the top directions capture max variance (Ch. 12); why decorrelation (PCA) ≠ independence, and how ICA's non-Gaussianity objective (Ch. 13) gets you the rest; EM as coordinate ascent on the ELBO and why it monotonically increases the likelihood (§11.2–11.3).
 
@@ -177,6 +181,7 @@ Together they touch **Chapters 1–15 and 17**. (Chapter 16, LQR/DDP/LQG, is int
 3. *ICA hunt:* run your ICA; inspect the top-activating tokens per independent component; label the ones that are interpretable ("plural nouns," "months," "code tokens"…).
 4. *Senses via EM:* pick polysemous words ("bank," "spring," "cell"), cluster their contextual embeddings with your GMM; show separated senses and compare to k-means (soft vs. hard).
 5. *Portfolio-grade:* one figure comparing PCA axes (uninterpretable) vs. ICA axes (interpretable) on the same data, plus the anisotropy-correction result with numbers.
+6. *Stretch — retrieval & RAG (Ch. 16):* build a tiny **semantic-retrieval** index (cosine over your embeddings, §16.3) on a few thousand sentences, then measure how much your "all-but-the-top" anisotropy correction changes retrieval quality (recall@k). If you want the full loop, wrap it in a minimal **RAG** step (§16.4): retrieve top-k passages, prepend them to a prompt, and read the answer with your `token_logprobs` plumbing. This turns the geometry you dissected into a working system and directly exercises the new contrastive/retrieval chapter.
 
 **Theory vs. reality.** The notes motivate PCA as *the* dimensionality-reduction method; reality is that its top directions here are often dominated by frequency/anisotropy artifacts and are *not* the semantically interesting ones — ICA's independence criterion (Ch. 13) does better. You'll show, with your own code, *why* "uncorrelated" (PCA) is weaker than "independent" (ICA).
 
@@ -184,7 +189,7 @@ Together they touch **Chapters 1–15 and 17**. (Chapter 16, LQR/DDP/LQG, is int
 
 **Scope & pitfalls.** ICA is sensitive to preprocessing — whiten first (PCA feeds ICA naturally). Don't over-interpret components; report the fraction that are human-labelable honestly. GMM in full dimension is unstable — reduce with your PCA first (a nice pipeline that reuses your own code).
 
-**Effort.** ~3 weekends. This is the most "classical ML" of the six and the best showcase of Chapters 10–13.
+**Effort.** ~3 weekends. This is the most "classical ML" of the seven and the best showcase of Chapters 10–13.
 
 ---
 
@@ -198,9 +203,9 @@ Together they touch **Chapters 1–15 and 17**. (Chapter 16, LQR/DDP/LQG, is int
 - **Ch. 3 — Generalized linear models** (§3.1 the exponential family, §3.2 constructing GLMs). The softmax over next-token logits is the canonical response function of the **categorical GLM**; understanding this is the theoretical spine of the project.
 - **Ch. 2 — Logistic regression** (§2.1) and **Newton's method** (§2.4) — Platt scaling *is* 1-D logistic regression on logits; temperature scaling is a 1-parameter fit you'll solve with Newton's method.
 - **Ch. 1 — Probabilistic interpretation** (§1.3): the notion that a model outputs a *distribution*, and MLE, is exactly the frame calibration lives in.
-- **Ch. 14 — Temperature** (Eqs. 14.13–14.16): your notes already introduce `softmax(f_θ(·)/τ)` and explain how τ sharpens/flattens the distribution. Calibration is the principled way to *choose* τ.
+- **Ch. 17 — Temperature & decoding** (§17.2): your notes already introduce `softmax(f_θ(·)/τ)` and explain how τ sharpens/flattens the distribution (alongside greedy decoding, top-k and top-p/nucleus sampling). Calibration is the principled way to *choose* τ.
 
-**The bridge.** The autoregressive LLM defines `p_θ(x_t | x_{<t}) = softmax(f_θ(·))` (Eq. 14.7) and is trained by cross-entropy MLE (Eq. 14.8) — pure Chapter 2/3 machinery at scale. But minimizing cross-entropy does **not** guarantee the probabilities are *calibrated*, especially after instruction-tuning/RLHF. So you take the exponential-family/GLM view of the model's head and ask an empirical question the notes set up but don't answer: *are these probabilities trustworthy, and can a 1-parameter GLM-style recalibration fix them?*
+**The bridge.** The autoregressive LLM defines `p_θ(x_t | x_{<t}) = softmax(f_θ(·))` (§17.2, Eq. 17.1's chain-rule factorization) and is trained by the **next-token prediction loss** (§17.2) — pure Chapter 2/3 machinery at scale. But minimizing cross-entropy does **not** guarantee the probabilities are *calibrated*, especially after instruction-tuning/RLHF. So you take the exponential-family/GLM view of the model's head and ask an empirical question the notes set up but don't answer: *are these probabilities trustworthy, and can a 1-parameter GLM-style recalibration fix them?*
 
 **The math you'll own.** Why softmax is the exponential family's categorical link (§3.1–3.2); the MLE/Newton derivation for fitting a temperature; the definition and estimator of **Expected Calibration Error (ECE)** and reliability diagrams; the distinction between *calibration* and *accuracy* (you can improve one without the other).
 
@@ -222,7 +227,7 @@ Together they touch **Chapters 1–15 and 17**. (Chapter 16, LQR/DDP/LQG, is int
 3. *The instruction-tuning effect:* base vs. instruct reliability diagrams side by side. Is the tuned model **overconfident**? (Commonly yes.)
 4. *Portfolio-grade:* selective-prediction curves, calibration across subjects/difficulty, and a short written claim about the accuracy-vs-honesty tradeoff of alignment tuning.
 
-**Theory vs. reality.** MLE training (the notes' Eq. 14.8) is often assumed to yield meaningful probabilities. You'll show empirically where that breaks — and that a *single scalar* from a GLM recalibration (Chapter 3) recovers much of the honesty, which is a striking "theory earns its keep" moment.
+**Theory vs. reality.** MLE training (the notes' next-token prediction loss, §17.2) is often assumed to yield meaningful probabilities. You'll show empirically where that breaks — and that a *single scalar* from a GLM recalibration (Chapter 3) recovers much of the honesty, which is a striking "theory earns its keep" moment.
 
 **The research question.** *"Does alignment/instruction-tuning systematically trade calibration for helpfulness, and is the damage uniform across topics or concentrated where the model is being 'agreeable'?"*
 
@@ -243,7 +248,7 @@ Together they touch **Chapters 1–15 and 17**. (Chapter 16, LQR/DDP/LQG, is int
 - **Ch. 2 — Logistic regression** as the discriminative counterpart.
 - **Ch. 5 — Kernels** and **Ch. 6 — SVM** (§6.5 duality, §6.8 the SMO algorithm): a kernel SVM is the third detector, and implementing SMO from scratch is a rite of passage.
 
-**The bridge.** Detecting machine-generated text is a real, unsolved, high-stakes problem. It's also the perfect testbed for §4.1.3's central claim: *generative models (GDA/NB) make stronger assumptions and win with little data; discriminative models (logistic/SVM) make weaker assumptions and win with lots.* The twist that makes it LLM-flavored: the best features aren't raw words but the **per-token log-likelihood signature** from a language model (Eq. 14.8's summands) — human text and model text sit differently under a model's own distribution (the intuition behind DetectGPT-style curvature detectors). So you compute features *with* an LLM and classify them *with* Chapter 4/6 algorithms you wrote yourself.
+**The bridge.** Detecting machine-generated text is a real, unsolved, high-stakes problem. It's also the perfect testbed for §4.1.3's central claim: *generative models (GDA/NB) make stronger assumptions and win with little data; discriminative models (logistic/SVM) make weaker assumptions and win with lots.* The twist that makes it LLM-flavored: the best features aren't raw words but the **per-token log-likelihood signature** from a language model (the summands of §17.2's next-token loss) — human text and model text sit differently under a model's own distribution (the intuition behind DetectGPT-style curvature detectors). So you compute features *with* an LLM and classify them *with* Chapter 4/6 algorithms you wrote yourself.
 
 **The math you'll own.** The GDA MLE (fitting φ, μ₀, μ₁, shared Σ) and why a shared covariance yields a *linear* boundary that connects to logistic regression (§4.1.3); the multinomial Naive Bayes event model and Laplace smoothing (§4.2); the SVM dual and the SMO coordinate-ascent updates (§6.8); the kernel trick (§5.3) for a nonlinear boundary in log-prob-feature space.
 
@@ -257,7 +262,7 @@ Together they touch **Chapters 1–15 and 17**. (Chapter 16, LQR/DDP/LQG, is int
 
 **Models & data.**
 - A "scorer" LM for features: `gpt2` / `pythia-410m` (you only need log-probs, so this is cheap).
-- Data: pair **human** text (e.g. WebText, Wikipedia, or human essays) with **machine** text you generate yourself from a small model at several **temperatures** (reuse Eqs. 14.13–14.16!) and, optionally, a few samples from an API model.
+- Data: pair **human** text (e.g. WebText, Wikipedia, or human essays) with **machine** text you generate yourself from a small model at several **temperatures** (reuse the temperature/decoding recipe in §17.2!) and, optionally, a few samples from an API model.
 
 **Milestones.**
 1. *MVP:* Naive Bayes on n-grams, human vs. machine; ROC/AUC baseline.
@@ -294,7 +299,7 @@ Together they touch **Chapters 1–15 and 17**. (Chapter 16, LQR/DDP/LQG, is int
 **Build it from scratch.**
 - **The linear/random-feature double descent** exactly as in the notes (§8.2, Fig. 8.12): random-feature ridge regression, sweep the number of features across the interpolation threshold, plot test error and the norm of the learned weights. This is your *theoretical anchor*, fully from scratch (NumPy).
 - **A bias-variance Monte-Carlo estimator** (§8.1.1): train an ensemble on resampled datasets; decompose test MSE into bias² + variance + noise; watch variance blow up at the threshold.
-- **A small Transformer** for grokking on modular arithmetic. Here you may use PyTorch `nn` modules as *plumbing*, but you write the **training loop, the weight-decay term, and all the logging** yourself, and you should be able to explain each module against Ch. 7.
+- **A small Transformer** for grokking on modular arithmetic. Here you may use PyTorch `nn` modules as *plumbing*, but you write the **training loop, the weight-decay term, and all the logging** yourself, and you should be able to explain each module against Ch. 7 — and now, thanks to the updated edition, against the **explicit Transformer architecture in §17.3** (multi-head self-attention + MLP blocks). Building the block from that spec rather than from a generic import is the natural on-ramp to Project 7.
 - *Plumbing:* PyTorch layers, optimizer, plotting.
 
 **Models & data.**
@@ -325,20 +330,22 @@ Together they touch **Chapters 1–15 and 17**. (Chapter 16, LQR/DDP/LQG, is int
 **Theme.** Training dynamics / behavior (and the modern technique most worth having on your résumé for LLM research).
 
 **CS229 anchors.**
-- **Ch. 17 — Policy Gradient (REINFORCE):** the core algorithm — the log-derivative trick, the score-function estimator, baselines for variance reduction. This *is* the "RL" in RLHF.
-- **Ch. 15 — Reinforcement learning / MDPs** (§15.1 MDP formalism, §15.2 value/policy iteration for grounding, §15.4 continuous/large state spaces → function approximation). You'll frame text generation as an MDP.
-- **Ch. 14 — Autoregressive generation** (Eqs. 14.9–14.16): the LLM's sampling process *is* the policy; temperature is your exploration knob.
+- **Ch. 21 — Policy Gradient (REINFORCE):** the core algorithm — the log-derivative trick, the score-function estimator, baselines for variance reduction (§21.1). This *is* the "RL" in RLHF. The updated edition now also gives you **PPO** (§21.2) — the clipped-objective successor that real RLHF pipelines actually use — as a citable stretch goal.
+- **Ch. 19 — Reinforcement learning / MDPs** (§19.1 MDP formalism, §19.2 value/policy iteration for grounding, §19.4 continuous/large state spaces → function approximation). You'll frame text generation as an MDP.
+- **Ch. 17 — Autoregressive generation** (§17.2): the LLM's sampling process *is* the policy; temperature is your exploration knob.
+- **§17.8 — Supervised Finetuning (SFT)** and **§15.2 — LoRA:** the updated edition now makes the *first* stage of the real RLHF recipe explicit. Before any RL, you **SFT** the base model on prompt–completion pairs (§17.8) — just the next-token loss on curated demonstrations — and you do it cheaply with a **LoRA** adapter (§15.2, the low-rank update you freeze the base weights around). Your Project 6 policy should start from an SFT/LoRA warm-start, exactly as production pipelines do.
+- **Ch. 18 — Reasoning: Chain-of-Thought & RLVR** (§18.1 CoT, §18.2 RLVR): brand-new in this edition and the most current thread in the book. **RLVR** (RL with *verifiable* rewards) is REINFORCE where the reward is a deterministic checker — is the math answer correct? does the code pass its tests? — so you need *no* reward model at all. That makes it the single most tractable "modern alignment" experiment for a solo builder on 8 GB, and it's the technique behind reasoning models.
 
-**The bridge.** RLHF/RLAIF — the alignment step behind essentially every deployed chat model — is policy gradient (Chapter 17) applied to an LLM whose **policy** is the autoregressive next-token distribution `π_θ(x_t | x_{<t}) = softmax(f_θ(·))` from §14.3. Framing decoding as an MDP (state = prefix, action = next token, reward = a score on the completion) turns your notes' RL chapters into the training loop for a language model. You'll build a minimal, transparent RLHF — no black-box `trl` — so you understand every term.
+**The bridge.** RLHF/RLAIF — the alignment step behind essentially every deployed chat model — is policy gradient (Chapter 21) applied to an LLM whose **policy** is the autoregressive next-token distribution `π_θ(x_t | x_{<t}) = softmax(f_θ(·))` from §17.2. Framing decoding as an MDP (state = prefix, action = next token, reward = a score on the completion) turns your notes' RL chapters into the training loop for a language model. You'll build a minimal, transparent RLHF — no black-box `trl` — so you understand every term.
 
-**The math you'll own.** The policy-gradient theorem and the REINFORCE estimator `∇_θ J = 𝔼[∇_θ log π_θ(a|s) · (R − b)]` (Ch. 17); why a **baseline** `b` reduces variance without adding bias; the role of a **KL penalty** to the reference policy (why RLHF keeps the model from collapsing) and how it connects to regularization (Ch. 9); the MDP framing (Ch. 15).
+**The math you'll own.** The policy-gradient theorem and the REINFORCE estimator `∇_θ J = 𝔼[∇_θ log π_θ(a|s) · (R − b)]` (Ch. 21); why a **baseline** `b` reduces variance without adding bias; the role of a **KL penalty** to the reference policy (why RLHF keeps the model from collapsing) and how it connects to regularization (Ch. 9); the MDP framing (Ch. 19).
 
 **Build it from scratch.**
 - **The REINFORCE loop:** sample completions from the policy, score them, compute the log-prob of each sampled token (`llmkit/logits.py`), form the policy-gradient loss, backprop. Written by hand — this is the point.
 - **Variance reduction:** a moving-average baseline and/or a learned value baseline; measure the variance reduction empirically (a great plot).
 - **A KL-to-reference penalty** (the RLHF stabilizer); sweep its coefficient and show the reward-vs-KL tradeoff (the canonical RLHF curve).
 - **Reward functions** (start rule-based, no reward model needed): a sentiment classifier score, a target-length reward, or "contains/avoids token X." *Stretch:* train a tiny reward model from preference pairs (reuse logistic regression) for a true 3-stage RLHF.
-- *Plumbing:* HF model + LoRA adapter (so you fine-tune cheaply on 8 GB), generation utilities, optimizer.
+- *Plumbing:* HF model + **LoRA** adapter (§15.2 — so you fine-tune cheaply on 8 GB), generation utilities, optimizer.
 
 **Models & data.**
 - Policy model: `gpt2` or `pythia-160m/410m` with a **LoRA** adapter — small enough that REINFORCE is stable and fast on 8 GB.
@@ -348,9 +355,10 @@ Together they touch **Chapters 1–15 and 17**. (Chapter 16, LQR/DDP/LQG, is int
 1. *MVP:* REINFORCE steers `gpt2` toward a trivial reward (e.g. longer or more-positive completions); reward goes up over training.
 2. *Variance reduction:* add a baseline; plot gradient variance and sample efficiency with vs. without it (your notes' baseline claim, verified).
 3. *Stay on the manifold:* add the KL penalty; show that without it the model **reward-hacks** into gibberish, and with it, quality holds — plot the reward-vs-KL frontier.
-4. *Portfolio-grade:* a clean writeup "RLHF in 300 lines," with the reward curves, the KL tradeoff, and before/after generation samples. *Stretch:* full 3-stage pipeline with a learned reward model from preference pairs.
+4. *Portfolio-grade:* a clean writeup "RLHF in 300 lines," with the reward curves, the KL tradeoff, and before/after generation samples. *Stretch:* full 3-stage pipeline — **SFT warm-start** (§17.8, next-token loss on demonstrations via a LoRA adapter) → learned reward model from preference pairs → REINFORCE.
+5. *Stretch — RLVR & reasoning (Ch. 18), the modern capstone:* swap the learned/rule reward for a **verifiable** one (§18.2) — pose small arithmetic or format-constrained tasks, let the model emit a **chain-of-thought** then a final answer (§18.1), and reward it *only* when a deterministic checker says the answer is correct. This is REINFORCE with a free, unhackable reward: no reward model, no human labels. Show accuracy climbing and reasoning traces getting longer/cleaner. It's the most current result in the entire notes, reproduced at 8 GB scale.
 
-**Theory vs. reality.** Ch. 17 promises the score-function estimator is unbiased but **high-variance**; you'll *feel* that variance (training is noisy) and *fix* it with baselines exactly as the theory says. You'll also discover the thing the notes don't emphasize — that reward maximization alone destroys the model (reward hacking), which is *why* real RLHF needs the KL term.
+**Theory vs. reality.** Ch. 21 promises the score-function estimator is unbiased but **high-variance**; you'll *feel* that variance (training is noisy) and *fix* it with baselines exactly as the theory says. You'll also discover the thing the notes don't emphasize — that reward maximization alone destroys the model (reward hacking), which is *why* real RLHF needs the KL term.
 
 **The research question.** *"How does the reward-vs-KL Pareto frontier change with model size and with the exploration temperature — i.e., how much 'alignment' can you buy before the policy drifts too far from the base model?"*
 
@@ -360,9 +368,58 @@ Together they touch **Chapters 1–15 and 17**. (Chapter 16, LQR/DDP/LQG, is int
 
 ---
 
+# Project 7 — Inside the Attention Head: mechanistic interpretability of a Transformer
+
+**Hook.** Now that your notes spell out the Transformer explicitly (§17.3), *build* self-attention from those equations, prove your version matches a real model's attention numerically, and then use it as a scalpel: visualize what each head attends to, hunt down an **induction head** (the circuit widely credited with in-context learning), and **ablate** heads one by one to prove — causally — which ones the model actually needs. This is the from-scratch, single-GPU version of mechanistic interpretability, the subfield most directly about "how does a Transformer *work* inside."
+
+**Theme.** Internals & interpretability (the deepest cut — from representation *geometry* to computational *mechanism*).
+
+**CS229 anchors.**
+- **§17.3 — Transformer architecture** (the core): single-head self-attention `p_{t,1..T} = softmax(q_t k_1^⊤/√d_h, …, q_t k_T^⊤/√d_h)`, the value-weighted output, multi-head self-attention, and how attention + MLP blocks stack. The updated edition hands you the exact equations you'll implement.
+- **§17.4 — Variants of Attention** (MQA, GQA, sliding-window): the KV-cache-saving spectrum. You'll implement ordinary multi-head, MQA, and GQA and measure the quality/memory tradeoff the notes describe.
+- **§17.5 — Mixture-of-Experts** (optional stretch): token-routed expert MLPs — implement a toy router and watch load balancing.
+- **§17.6 — In-context learning**: the phenomenon your induction-head hunt tries to *mechanistically explain*.
+- **Ch. 18 — Chain-of-Thought & RLVR** (§18.1, §18.2): the reasoning extension — does making the model "think step by step" change which heads are causally required?
+- *Reuses your own tools:* **Ch. 12 PCA** (Project 2) to analyze a head's low-rank QK/OV subspaces, and **Ch. 2 logistic probes** (Project 1) to read what a single head writes into the residual stream.
+
+**The bridge.** Projects 1–2 asked *where* information lives (which layer, which direction). This one asks *which component computes it*. Self-attention is not a black box any more: §17.3 defines it as three linear maps (query, key, value) plus a softmax, and that is *entirely* CS229-level linear algebra — the same softmax from Chapter 2, the same low-rank structure from Chapter 12. The leap to research is that these small linear circuits compose into algorithms: an "induction head" implements *"find where this token appeared before and copy what came next,"* which is a concrete, testable mechanism for the in-context learning of §17.6. You'll build the primitive from the notes' equations, then reverse-engineer the algorithm from a real model.
+
+**The math you'll own.** Scaled dot-product attention and *why* the `1/√d_h` scaling is there — §17.3 shows the pre-softmax logits have variance ∝ d_h, so without scaling they saturate the softmax as d_h grows (you'll verify this by deleting the scale and watching attention collapse to one token); multi-head attention as parallel projections into `d_h`-dimensional subspaces and their concatenation; the **QK circuit** (which positions a head reads from) vs. the **OV circuit** (what it writes when it does), and why each is effectively low-rank; the permutation-equivariance of pure attention and hence *why positional information must be injected* (the §17.3 footnote); MQA/GQA as sharing key/value heads to shrink the KV cache.
+
+**Build it from scratch.**
+- **Single-head self-attention** implemented straight from §17.3, then a **numerical equivalence test**: load GPT-2, pull `Q,K,V` weights for one head, run your code and HF's, and assert the outputs match to floating-point tolerance. (Nailing this is the whole foundation — and a great "I understand it exactly" artifact.)
+- **Multi-head**, then the **MQA and GQA variants** (§17.4); compare KV-cache memory and output quality on the same prompts.
+- **Attention atlas:** extract attention matrices (via hooks — extends `llmkit/activations.py`) and visualize them; classify heads you find (previous-token heads, delimiter/BOS heads, positional heads).
+- **Induction-head test:** feed repeated random-token sequences `[A][B]…[A]→?`; a real induction head spikes on `[B]`. Score every head by its induction signal; locate the head(s) that implement copying.
+- **Causal ablation:** zero (or mean-patch) one head at a time; measure the change in next-token loss and in the induction score → a ranked *importance map* of heads. Optional: **activation patching** to localize a behavior to specific head+position.
+- *Plumbing:* HF weight access, hook-based capture, matplotlib heatmaps. Everything *interpretive* (the attention math, the induction metric, the ablation loop) you write yourself.
+
+**Models & data.**
+- Models: `gpt2` and `gpt2-medium` (canonical, well-documented internals), plus `pythia-160m`/`410m` to test scale — all fp16, trivially within 8 GB.
+- Data: synthetic repeated-token sequences for the induction test (no downloads); a few hundred natural sentences for the attention atlas; for the Ch. 18 extension, a small set of 2–3 step arithmetic/word problems.
+
+**Milestones.**
+1. *MVP:* your from-scratch single-head attention matches HF GPT-2's for one layer/head to tolerance — correctness proven, not assumed.
+2. *Variants:* multi-head + MQA/GQA implemented; a table of KV-cache size vs. quality reproducing the §17.4 tradeoff.
+3. *Atlas:* an attention-pattern gallery with heads categorized; you can point to a "previous-token head" and a "BOS/attention-sink head."
+4. *Induction head, found:* the induction-score sweep flags specific heads; you show their attention literally copying `[A]→[B]`.
+5. *Causal map:* head-ablation importance ranking; knocking out the induction head measurably hurts in-context copying (mechanism *confirmed*, not just correlated).
+6. *Portfolio-grade:* a writeup — "I found and causally verified an induction head in GPT-2 from scratch" — with the equivalence test, the atlas, and the ablation map.
+7. *Stretch — reasoning (Ch. 18):* on small multi-step problems, compare the head-importance map **with vs. without a chain-of-thought prompt** (§18.1). Does "thinking step by step" recruit different heads? Pair with Project 6's RLVR (§18.2) to ask whether *training* for correct reasoning sharpens those heads.
+
+**Theory vs. reality.** §17.3 justifies the `1/√d_h` scaling on paper; you'll *see* attention saturate without it. §17.6 asserts in-context learning happens but doesn't say *how* — you'll produce the widely-cited mechanistic answer (induction heads) on a model small enough to fully dissect, and feel the gap between "attention looks like it's copying" (a suggestive picture) and "ablating this head breaks copying" (a causal claim). The honest surprise: not every visually striking head matters, and some crucial heads look boring.
+
+**The research question.** *"Which attention heads are causally necessary for in-context copying, and does that set shift with scale (pythia-160m → 410m) or when the prompt contains a chain of thought?"* A clean, genuinely open-flavored mechanistic-interpretability question you can answer at 8 GB and defend in an interview.
+
+**Scope & pitfalls.** Matching HF attention exactly is fiddly — mind the causal mask, the scaling, and where layer-norm sits; budget debugging time for the equivalence test (it's worth it). Attention maps are *seductive*: never claim a head "does" something from a picture alone — back it with ablation. Attention matrices are `T×T` per head, so keep sequences short and move them to CPU. Use mean-ablation (not zero) when zeroing pushes activations off-distribution.
+
+**Effort.** ~3–4 weekends. The most advanced project in the set, and the one that lands you squarely in the vocabulary of current interpretability research.
+
+---
+
 # Appendix A — Suggested order & dependencies
 
-You don't have to do all six, but they're designed to compound. Recommended path:
+You don't have to do all seven, but they're designed to compound. Recommended path:
 
 1. **Shared toolkit (`llmkit`)** — half a day; unblocks everything.
 2. **Project 1 (Probes)** — builds `probe.py` (logistic/softmax regression) that Projects 3 and 4 reuse. Best first real project.
@@ -371,24 +428,26 @@ You don't have to do all six, but they're designed to compound. Recommended path
 5. **Project 4 (Detection)** — reuses `probe.py` and log-prob utilities; the SMO implementation is the big lift.
 6. **Project 5 (Double descent)** — mostly standalone; needs patience more than code.
 7. **Project 6 (RLHF)** — most involved; do it once you're comfortable with generation + LoRA.
+8. **Project 7 (Attention internals)** — reuses the P1 hook pattern and P2's PCA but stands on its own; the most advanced, best saved for last (or done right after P2 if mechanistic interpretability is your priority).
 
 Dependency sketch:
 
 ```
 llmkit  ──►  P1 (probe.py) ──►  P3
-   │              └──────────►  P4  ◄── (SMO, GDA, NB: new)
-   ├──►  P2 (linalg.py)
+   │              ├──────────►  P4  ◄── (SMO, GDA, NB: new)
+   │              └──────────►  P7  ◄── (also uses P2's PCA)
+   ├──►  P2 (linalg.py) ───────► P7
    ├──►  P5  (independent)
-   └──►  P6  (independent, needs LoRA + generation)
+   └──►  P6  (independent, needs LoRA + generation; RLVR extension → Ch. 18)
 ```
 
-A realistic pace for one developer treating this as a serious side-project: **one project every 2–4 weekends**, so the full set is a ~4–6 month arc. Doing **any three** (e.g. 1, 3, 6 — one per theme) already makes a coherent portfolio story: *"I can probe what a model knows, measure whether it's honest, and align it."*
+A realistic pace for one developer treating this as a serious side-project: **one project every 2–4 weekends**, so the full set is a ~5–7 month arc. Doing **any three** (e.g. 1, 3, 6 — one per theme) already makes a coherent portfolio story: *"I can probe what a model knows, measure whether it's honest, and align it."* If your target is interpretability specifically, the sharpest three are **1 → 2 → 7** (*"I can probe representations, map their geometry, and reverse-engineer the attention circuits behind them"*).
 
 ---
 
 # Appendix B — Environment setup for 8 GB VRAM
 
-A single environment covers all six projects.
+A single environment covers all seven projects.
 
 ```bash
 # CUDA-enabled PyTorch (match your CUDA version)
@@ -411,9 +470,9 @@ pip install sentence-transformers   # Project 2 semantic-similarity eval
 
 ---
 
-# Appendix C — Why Chapter 16 (LQR/DDP/LQG) is left out
+# Appendix C — Why Chapter 20 (LQR/DDP/LQG) is left out
 
-Chapters 15 and 17 (MDPs and policy gradient) bridge cleanly to LLMs through RLHF, so they're in (Project 6). **Chapter 16 — LQR, DDP, LQG** — is about optimal control of continuous dynamical systems with quadratic cost and Gaussian noise. It's beautiful and central to robotics/control, but it does not map naturally onto language-model research, and forcing a bridge would produce exactly the kind of contrived project you asked to avoid. Leaving it out is the honest call. (If you ever pivot toward control or RL-for-robotics, Chapter 16 becomes a first-class project on its own terms.)
+Chapters 19 and 21 (MDPs and policy gradient) bridge cleanly to LLMs through RLHF, so they're in (Project 6). **Chapter 20 — LQR, DDP, LQG** — is about optimal control of continuous dynamical systems with quadratic cost and Gaussian noise. It's beautiful and central to robotics/control, but it does not map naturally onto language-model research, and forcing a bridge would produce exactly the kind of contrived project you asked to avoid. Leaving it out is the honest call. (If you ever pivot toward control or RL-for-robotics, Chapter 20 becomes a first-class project on its own terms.) The other honest omission is the new **Chapter 14 — Diffusion models**: it's a gorgeous topic and a genuine foundation-model family, but it's an image/continuous-signal thread rather than a language thread, so it sits outside this LLM-focused arc. If you want it later, it pairs naturally with the VAE/variational-inference material now in §11.5.
 
 ---
 
@@ -426,7 +485,8 @@ Each project deliberately shadows a real line of work, so you can read the sourc
 - **P3 (Calibration):** Guo et al., *"On Calibration of Modern Neural Networks"* (temperature scaling). Desai & Durrett / Kadavath et al. on LLM calibration and "language models (mostly) know what they know."
 - **P4 (Detection):** Mitchell et al., *"DetectGPT"* (log-prob curvature). Your notes' §4.1.3 (Ng) for the generative-vs-discriminative theory.
 - **P5 (Double descent / grokking):** Nakkiran et al., *"Deep Double Descent."* Power et al., *"Grokking."* Belkin et al. (referenced in your notes' §8.2 bibliography).
-- **P6 (RLHF):** Williams, *"Simple statistical gradient-following algorithms"* (REINFORCE). Ziegler et al. / Stiennon et al. / Ouyang et al. (InstructGPT) for the RLHF pipeline.
+- **P6 (RLHF):** Williams, *"Simple statistical gradient-following algorithms"* (REINFORCE). Ziegler et al. / Stiennon et al. / Ouyang et al. (InstructGPT) for the RLHF pipeline. For the RLVR extension: DeepSeek-AI, *"DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning"* and Lambert et al., *"Tülu 3"* (verifiable-reward training).
+- **P7 (Attention internals):** Elhage et al., *"A Mathematical Framework for Transformer Circuits"* (QK/OV circuits). Olsson et al., *"In-context Learning and Induction Heads."* Wang et al., *"Interpretability in the Wild"* (the IOI circuit) and the *"activation patching"* methodology (Meng et al., ROME; Zhang & Nanda on best practices). For the CoT extension: Wei et al., *"Chain-of-Thought Prompting."*
 
 ---
 
@@ -478,7 +538,7 @@ sst2 = load_dataset("glue", "sst2")           # sst2["train"], sst2["validation"
 |---|---|---|---|
 | Static token embeddings | the model itself | `model.get_input_embeddings().weight.detach()` | no dataset needed |
 | Semantic-similarity eval | STS-B (GLUE) | `load_dataset("glue","stsb")` → `sentence1`,`sentence2`,`label`(0–5) | correlate cosine vs. gold (Spearman) |
-| Contexts for polysemy / anisotropy | WikiText-103 | `load_dataset("Salesforce/wikitext","wikitext-103-raw-v1")` | sample a few thousand sentences |
+| Contexts for polysemy / anisotropy | WikiText-103 | `Salesforce/wikitext` (`wikitext-103-raw-v1`) | sample a few thousand sentences |
 
 ```python
 sts = load_dataset("glue", "stsb")            # measure Spearman(cosine(emb1,emb2), label)
@@ -514,7 +574,7 @@ mmlu = load_dataset("cais/mmlu", "all")       # use validation to FIT temperatur
 | Role | Source | Load |
 |---|---|---|
 | Ready-made human vs. machine | HC3 (Human ChatGPT Comparison Corpus) | `load_dataset("Hello-SimpleAI/HC3","all")` → `human_answers`,`chatgpt_answers` |
-| Human reference corpus (self-gen setup) | WikiText-103 | `load_dataset("Salesforce/wikitext","wikitext-103-raw-v1")` |
+| Human reference corpus (self-gen setup) | WikiText-103 | `Salesforce/wikitext` (`wikitext-103-raw-v1`) |
 | Machine text | **you generate it** | sample from a small model at temps {0.7, 1.0, 1.3} |
 
 ```python
@@ -561,6 +621,30 @@ imdb = load_dataset("stanfordnlp/imdb", split="train")   # prompt = review[:few 
 
 **Rule-based rewards need no model at all** (target length, "contains word X", regex format) — start there to debug the REINFORCE loop, then swap in the sentiment reward.
 **License:** GPT-2/Pythia and the DistilBERT rewards are permissive; `hh-rlhf` is MIT (Anthropic).
+**RLVR extension (Ch. 18):** no dataset download needed — generate arithmetic problems on the fly and reward with a Python equality check; or sample a few hundred from `openai/gsm8k` (`load_dataset("openai/gsm8k","main")`) and reward when the parsed final answer matches.
+
+---
+
+### P7 — Inside the Attention Head
+
+| Role | ID | Notes |
+|---|---|---|
+| Model to dissect | `gpt2`, `gpt2-medium` | canonical, heavily-documented heads; fp16, tiny |
+| Scale comparison | `EleutherAI/pythia-160m`, `EleutherAI/pythia-410m` | same architecture at two sizes — ideal for "does the circuit move with scale?" |
+| Induction-head test | *synthetic, no download* | random repeated token sequences `[A][B]…[A]→?`; generate in NumPy |
+| Attention atlas text | `Salesforce/wikitext` (`wikitext-2-raw-v1`) or reuse SST-2 | a few hundred natural sentences for pattern visualization |
+| Reasoning extension (Ch. 18) | hand-write ~50 or `openai/gsm8k` | small multi-step problems for the CoT head-importance comparison |
+
+```python
+from transformers import AutoModelForCausalLM, AutoTokenizer
+tok = AutoTokenizer.from_pretrained("gpt2")
+model = AutoModelForCausalLM.from_pretrained("gpt2", output_attentions=True).eval()
+out = model(**tok("The cat sat on the mat", return_tensors="pt"))
+# out.attentions: tuple(n_layers) of (batch, n_heads, T, T) — your ground truth to match & analyze
+```
+
+**What to extract:** per-layer attention tensors `(heads, T, T)` for the atlas; the model's `Q/K/V` weight blocks (`model.transformer.h[L].attn`) for the from-scratch equivalence test; and next-token loss via `token_logprobs` before/after zeroing a head for the ablation map.
+**License:** GPT-2, Pythia, WikiText, and GSM8K are all permissive/research-friendly.
 
 ---
 

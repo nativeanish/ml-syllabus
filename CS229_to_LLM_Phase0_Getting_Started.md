@@ -1,6 +1,6 @@
 # Getting Started Tomorrow — Scaffolding the `llmkit` Toolkit (Phase 0)
 
-*Do this before Project 1. It takes one focused sitting (2–4 hours) and it unlocks all six projects. The goal of Phase 0 is small but crucial: **be able to open any small model and read out both its internal activations and its next-token probabilities.** Everything else builds on that.*
+*Do this before Project 1. It takes one focused sitting (2–4 hours) and it unlocks all seven projects. The goal of Phase 0 is small but crucial: **be able to open any small model and read out both its internal activations and its next-token probabilities.** Everything else builds on that.*
 
 > **What I give you here vs. what you build:** the toolkit is *plumbing* — shared infrastructure you're meant to reuse, so I hand you working code for it. The *learning algorithms* (logistic regression, PCA, ICA, GDA, SMO, REINFORCE, …) are left as stubs on purpose — coding those yourself is the whole point of the projects.
 
@@ -68,7 +68,7 @@ from .logits import token_logprobs, sequence_loglik
 
 ## Step 3 — The two functions that unlock everything (paste these in)
 
-`llmkit/activations.py` — read the model's internal representations. This is the object your notes call `φ_θ(x)` (Ch. 14.1).
+`llmkit/activations.py` — read the model's internal representations. This is the object your notes call `φ_θ(x)` (§15.1).
 
 ```python
 import torch
@@ -103,7 +103,7 @@ def get_activations(model, tokenizer, texts, layers=None, pooling="last", batch_
     return {L: torch.cat(v, 0) for L, v in out.items()}
 ```
 
-`llmkit/logits.py` — read the model's next-token probabilities. These are the summands of the cross-entropy loss in your notes (Ch. 14, Eq. 14.8).
+`llmkit/logits.py` — read the model's next-token probabilities. These are the summands of the **next-token prediction loss** in your notes (§17.2).
 
 ```python
 import torch
@@ -222,6 +222,7 @@ Everything downstream is a thin layer on these two functions:
 - **Project 3 (Calibration)** reads answer-token probabilities via `token_logprobs(...)`.
 - **Project 4 (Detection)** turns `token_logprobs(...)` into "surprise" features for your from-scratch classifiers.
 - **Projects 5–6** reuse the plumbing patterns (batched forward passes, log-probs) even though they add training loops.
+- **Project 7 (Attention Internals)** extends `get_activations`' hook pattern to capture *attention matrices* specifically, and reuses `token_logprobs` to measure the loss change when you ablate a head. The two functions you build today are the exact handles it grabs.
 
 Build this once, build it cleanly, and you never write model-plumbing again for the rest of the curriculum.
 
